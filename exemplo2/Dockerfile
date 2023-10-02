@@ -9,6 +9,8 @@ RUN go build -o /server
 
 FROM gcr.io/distroless/base-debian10
 
+ENV TZ="America/Sao_Paulo"
+
 CMD ["/bin/bash"]
 
 WORKDIR /
