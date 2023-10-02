@@ -1,0 +1,32 @@
+version: '3.7'
+services:
+
+  app:
+    image: teste02-golang:latest
+    build:
+      context: ./exemplo2
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - "TZ=America/Sao_Paulo" 
+      - LOAD_ENV_FILE=true
+    volumes:
+      - ./exemplo2/.env:/.env 
+    depends_on:
+      - oracle-xe
+
+
+      
+  oracle-xe:
+    image: gvenzl/oracle-xe
+    ports:
+      - "1521:1521" # Mapeia a porta do Oracle para acesso externo
+      - "8080:8080" # Porta para o Oracle Enterprise Manager
+
+    environment:
+      - "TZ=America/Sao_Paulo" 
+      - ORACLE_ALLOW_REMOTE=true # Permite conexões remotas
+      - ORACLE_PASSWORD=abc123!@#
+    volumes:
+      - /opt/oracle/oradata 
