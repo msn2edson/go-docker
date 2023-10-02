@@ -25,3 +25,4 @@ services:
       - ORACLE_PASSWORD=abc123!@#
     volumes:
       - /opt/oracle/oradata 
+      - ./db-scripts:/docker-entrypoint-initdb.d/
