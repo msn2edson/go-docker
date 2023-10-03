@@ -8,6 +8,8 @@ services:
       - "3000:3000"
     environment:
       - LOAD_ENV_FILE=true
+    networks:
+      - my-network
     volumes:
       - ./.env:/.env 
     depends_on:
@@ -23,6 +25,10 @@ services:
       - "TZ=America/Sao_Paulo" 
       - ORACLE_ALLOW_REMOTE=true # Permite conexões remotas
       - ORACLE_PASSWORD=abc123!@#
+    networks:
+      - my-network
     volumes:
       - /opt/oracle/oradata 
       - ./db-scripts:/docker-entrypoint-initdb.d/
+networks:
+  my-network:
