@@ -1,30 +1,46 @@
 package main
 
 import (
-	"fmt"
-	"log"
 	"net/http"
-	"os"
-	"time"
 
-	"github.com/joho/godotenv"
+	"github.com/heptiolabs/healthcheck"
+	go_ora "github.com/sijms/go-ora/v2"
 )
 
-func horaCerta(w http.ResponseWriter, r *http.Request) {
-	s := time.Now().Format("02/01/2006 03:04:05")
-	fmt.Fprintf(w, "<h1>Hora certa: %s</h1>", s)
-}
-
 func main() {
-	if os.Getenv("LOAD_ENV_FILE") == "true" {
-		err := godotenv.Load()
-		if err != nil {
-			panic("Error loading .env file")
-		}
-	}
+	connStr := `(DESCRIPTION=
+    (ADDRESS_LIST=
+    	(LOAD_BALANCE=OFF)
+        (FAILOVER=ON)
+    	(address=(protocol=tcp)(host=localhost)(port=1521))
+    )
+    (CONNECT_DATA=
+    	(SERVICE_NAME=XE)
+        (SERVER=DEDICATED)
+    )
+    (SOURCE_ROUTE=yes)
+    )`
+	databaseUrl := go_ora.BuildJDBC("sato", "abc123", connStr, nil)
+	db, err := sql.Open("oracle", databaseUrl)
 
-	http.HandleFunc("/horaCerta", horaCerta)
-	log.Println("Executando...", os.Getenv("BASE_URL"))
-	log.Println("Teste env...", os.Getenv("ORACLE_DB_USER"))
-	log.Fatal(http.ListenAndServe(":3000", nil))
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+
+
+
+
+	// Create a new health check handler
+	h := healthcheck.NewHandler()
+
+	// Register health checks for any dependencies
+	//h.AddLivenessCheck("database", healthcheck.DatabasePingCheck("mysql", "user:password@tcp(db:3306)/mydatabase"))
+	h.AddReadinessCheck("database", DatabasePingCheck(db, 1*time.Second))
+
+
+	// Create an HTTP server and add the health check handler as a handler
+	http.HandleFunc("/health", h.Handler)
+	http.ListenAndServe(":3000", nil)
 }

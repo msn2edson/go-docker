@@ -2,7 +2,7 @@ version: '3.7'
 services:
 
   app:
-    image: teste03-go-alpine:latest
+    image: teste04-go-alpine:latest
     build: .
     ports:
       - "3000:3000"
