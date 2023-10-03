@@ -1,4 +1,4 @@
-FROM golang:1.18 AS build
+FROM golang:1.21.1-alpine3.18 as build
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ COPY . cmd/server/main.go ./
 
 RUN go build -o /server
 
-FROM gcr.io/distroless/base-debian10
+FROM alpine:3.18
 
 ENV TZ="America/Sao_Paulo"
 
@@ -18,7 +18,5 @@ WORKDIR /
 COPY --from=build /server /server
 
 EXPOSE 3000
-
-USER nonroot:nonroot
 
 ENTRYPOINT ["/server"]
